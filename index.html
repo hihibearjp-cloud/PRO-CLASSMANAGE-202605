@@ -17,7 +17,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- 鎖定 Babel 穩定版本 -->
     <script crossorigin src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -25,7 +24,6 @@
 
     <script>
         (function() {
-            // 加入了 Pro++ 文字在左上角
             const svgSource = `
             <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
                 <rect width="512" height="512" rx="100" fill="#FFD700"/>
@@ -80,7 +78,6 @@
         @media print {
             body, html { background: white !important; margin: 0; padding: 0; overflow: visible !important; height: auto !important; }
             .no-print { display: none !important; }
-            /* 徹底移除列印時的深色背景，防止出現左右黑邊 */
             .bg-\\[\\#525659\\] { background-color: white !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             @page { size: B4 portrait; margin: 0; }
@@ -333,7 +330,7 @@
           useEffect(() => {
               const fetchConfig = async () => {
                   try {
-                      // ★★★ 已自動為您貼上 Google Apps Script 網址 ★★★
+                      // ★★★ 已經替換為您的專屬 Google Apps Script 網址 ★★★
                       const GAS_URL = "https://script.google.com/macros/s/AKfycbwqThdNLNaMJHEuewC_ruh_HX8XhFqYlusm-gCR9MXG_elNh4B6ujM0jFMr6s5h9JS5rw/exec"; 
                       
                       const hasCounted = sessionStorage.getItem('app_has_counted');
@@ -682,6 +679,9 @@
               if (pinInput === String(remoteConfig.app_password)) {
                   setIsLocked(false);
                   sessionStorage.setItem('app_unlocked', 'true');
+                  // ★ 新增：強制清除創作者狀態，確保一般登入絕對乾淨留白
+                  setIsCreator(false);
+                  localStorage.removeItem('classLogCreator');
               } else if (pinInput === String(remoteConfig.creator_password)) {
                   setIsLocked(false);
                   sessionStorage.setItem('app_unlocked', 'true');
@@ -1156,15 +1156,15 @@
                     `;
 
                     html += `
-                    <div class="print-card">
-                        <div class="print-header">
+                    <div class="print-card" contenteditable="true" style="outline: none; cursor: text;">
+                        <div class="print-header" contenteditable="false">
                             <span>${student.id}. ${student.name}</span>
                             <span style="font-weight: normal; font-size: 11pt;">${dateRange}</span>
                         </div>
                         <div class="print-body">
                             ${bodyContent}
                         </div>
-                        <div class="print-footer">
+                        <div class="print-footer" contenteditable="false">
                             <div style="font-size: 10pt; font-weight: normal; text-align: left; margin-bottom: 8px;">請多多關心孩子的學習狀況，謝謝您的配合！</div>
                             <div>家長簽名：________________</div>
                         </div>
@@ -1208,8 +1208,8 @@
                      hasData = true;
                      const formattedLog = (dayData.incidentLog || '').replace(/\n/g, '<br/>'); 
                      
-                     htmlContent += `<div style="margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; page-break-inside: avoid;">`;
-                     htmlContent += `<h3 style="color: #1976D2; margin-top: 0; border-bottom: 2px dashed #1976D2; padding-bottom: 8px; font-size: 16pt;">📅 日期：${dateKey}</h3>`;
+                     htmlContent += `<div contenteditable="true" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; page-break-inside: avoid; outline: none; cursor: text;">`;
+                     htmlContent += `<h3 style="color: #1976D2; margin-top: 0; border-bottom: 2px dashed #1976D2; padding-bottom: 8px; font-size: 16pt;" contenteditable="false">📅 日期：${dateKey}</h3>`;
                      
                      if (dayData.incidentStudents && dayData.incidentStudents.length > 0) {
                          const studentStr = dayData.incidentStudents.map(id=>students.find(s=>s.id===id)?.name || id).join('、');
@@ -1310,15 +1310,12 @@
                           .print-body { padding: 12px; flex-grow: 1; overflow: hidden; }
                           .print-footer { border-top: 2px solid #5D4037; padding: 8px 12px; text-align: right; background: white; }
                           
-                          #print-wrapper [contenteditable="true"]:focus { outline: 2px dashed #4A90E2; outline-offset: 4px; border-radius: 4px; }
-                          .print-card:focus-within { border-color: #4A90E2; box-shadow: 0 0 0 2px rgba(74,144,226,0.3); }
+                          [contenteditable="true"]:focus { outline: 2px dashed #4A90E2 !important; outline-offset: 4px; border-radius: 4px; }
                       `}</style>
 
                       <div 
                           id="print-wrapper" 
-                          contentEditable={true} 
-                          suppressContentEditableWarning={true}
-                          className="mt-6 print:mt-0 bg-white shadow-2xl focus:outline-none cursor-text print:shadow-none" 
+                          className="mt-6 print:mt-0 bg-white shadow-2xl focus:outline-none print:shadow-none" 
                           style={{ width: wrapperWidth, minHeight: '297mm', padding: isB4Grid ? '0' : '20px' }} 
                           dangerouslySetInnerHTML={{ __html: printHtml }} 
                       />
@@ -1501,8 +1498,31 @@
                 </div> 
               </div> 
               
-              <div className="doodle-card p-5 bg-white relative overflow-hidden"><div className="absolute top-0 left-0 w-full h-4 bg-mint border-b-2 border-coffee"></div><h3 className="text-2xl font-bold mb-5 mt-3 flex items-center gap-2"><Icon name="Clock" className="w-7 h-7" /> 到校狀況</h3><div className="grid grid-cols-2 md:grid-cols-3 gap-4">{ATTENDANCE_TYPES.map(type => { const count = attendanceData[type.id]?.length || 0; return <button key={type.id} onClick={() => handleAttendanceClick(type.id)} className={`btn-3d p-3 flex items-center justify-between px-4 ${type.color} h-20`}><div className="flex items-center gap-2"><Icon name={type.icon} className="w-8 h-8" /><span className="text-2xl font-bold">{type.label}</span></div>{count > 0 && <span className="bg-coffee text-white text-xl px-3 py-1 rounded-full font-bold">{count}</span>}</button> })}</div></div> <div className="doodle-card p-5 bg-white relative overflow-hidden"> <div className="absolute top-0 left-0 w-full h-4 bg-yellow border-b-2 border-coffee"></div> <h3 className="text-2xl font-bold mb-5 mt-3 flex items-center gap-2"><Icon name="FileWarning" className="w-7 h-7" /> 作業與聯絡簿</h3> 
-              <div className="flex flex-wrap justify-center gap-2 mb-4">
+              <div className="doodle-card p-5 bg-white relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-4 bg-mint border-b-2 border-coffee"></div>
+                  <h3 className="text-2xl font-bold mb-5 mt-3 flex items-center gap-2"><Icon name="Clock" className="w-7 h-7" /> 到校狀況</h3>
+                  
+                  {/* 使用 grid-cols-3 強制將 6 個項目排成 2 列 */}
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                      {ATTENDANCE_TYPES.map(type => { 
+                          const count = attendanceData[type.id]?.length || 0; 
+                          return (
+                              <button key={type.id} onClick={() => handleAttendanceClick(type.id)} className={`btn-3d p-2 flex flex-col items-center justify-center px-1 ${type.color} h-16 sm:h-20 relative`}>
+                                  <div className="flex flex-col items-center gap-1">
+                                      <Icon name={type.icon} className="w-6 h-6 sm:w-8 sm:h-8" />
+                                      <span className="text-sm sm:text-lg font-bold leading-none">{type.label}</span>
+                                  </div>
+                                  {count > 0 && <span className="absolute -top-2 -right-2 bg-coffee text-white text-xs px-2 py-0.5 rounded-full font-bold shadow-sm z-10">{count}</span>}
+                              </button>
+                          ) 
+                      })}
+                  </div>
+              </div> 
+              
+              <div className="doodle-card p-5 bg-white relative overflow-hidden"> 
+                  <div className="absolute top-0 left-0 w-full h-4 bg-yellow border-b-2 border-coffee"></div> 
+                  <h3 className="text-2xl font-bold mb-5 mt-3 flex items-center gap-2"><Icon name="FileWarning" className="w-7 h-7" /> 作業與聯絡簿</h3> 
+                  <div className="flex flex-wrap justify-center gap-2 mb-4">
                   {contactBookTypes.map(item => (
                       <button key={item.id} onClick={() => openSelector('missing', item.id)} className={`btn-3d flex flex-col items-center justify-center p-2 h-28 md:h-32 ${item.color || 'bg-yellow'} relative w-[calc(33.333%-6px)] sm:w-[calc(25%-6px)] md:w-[calc(20%-7px)]`}>
                           <Icon name={item.icon} className="w-8 h-8 md:w-10 md:h-10 mb-1 md:mb-2"/>
@@ -1510,8 +1530,8 @@
                           {missingData[item.id]?.length > 0 && <span className="absolute top-[-5px] right-[-5px] w-6 h-6 md:w-8 md:h-8 bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-coffee text-xs md:text-sm font-bold z-10">{missingData[item.id].length}</span>}
                       </button>
                   ))}
-              </div> 
-              <div className="border-t-2 border-coffee pt-4 space-y-4"> <div className="flex justify-between items-center"><h4 className="font-bold text-coffee opacity-80 text-lg">各科作業缺交</h4><button onClick={() => setIsAddingSubject(!isAddingSubject)} className="text-sm bg-mint px-3 py-1 rounded-full border-2 border-coffee hover:bg-green-200"><Icon name="Plus" className="w-4 h-4" /></button></div> {isAddingSubject && <div className="flex gap-2"><input autoFocus type="text" value={newSubjectName} onChange={e => setNewSubjectName(e.target.value)} className="input-hand text-lg py-2" /><button onClick={handleAddSubject} className="btn-3d px-4 bg-coffee text-white text-lg">OK</button></div>} {subjects.length > 0 ? ( <div className="space-y-3"> <div className="flex gap-2"> <select value={currentSubjectId} onChange={(e) => setCurrentSubjectId(e.target.value)} className="input-hand text-2xl flex-1 bg-gray-50 font-bold border-2 border-coffee h-[70px]">{subjects.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select> <button onClick={(e) => handleDeleteSubject(currentSubjectId, e)} className="btn-3d bg-pink text-white px-3"><Icon name="Trash2" className="w-6 h-6"/></button> </div> <button onClick={() => openSelector('missing', currentSubjectId)} className="btn-3d w-full bg-white py-4 text-lg flex justify-between px-5 border-2 border-coffee shadow-sm group active:bg-yellow"><span className="font-bold flex items-center gap-2"><Icon name="Edit3" className="w-6 h-6"/> <span className="text-2xl">登記 {subjects.find(s=>s.id===currentSubjectId)?.label} 缺交</span></span>{missingData[currentSubjectId]?.length > 0 ? <span className="bg-pink text-white px-3 py-1 rounded-full text-lg font-bold">{missingData[currentSubjectId].length} 人</span> : <span className="text-gray-400 text-sm">點擊登記</span>}</button> </div> ) : <div className="text-center text-gray-400 py-2">請先新增科目...</div>} <div className="flex flex-wrap gap-2 mt-2">{subjects.map(s => { const count = missingData[s.id]?.length || 0; if (count === 0) return null; return ( <button key={s.id} onClick={() => { setCurrentSubjectId(s.id); openSelector('missing', s.id); }} className="bg-white border-2 border-coffee px-3 py-2 rounded-full text-base font-bold flex items-center gap-2 shadow-sm hover:bg-gray-50">{s.label} <span className="bg-pink text-white px-2 rounded-full text-sm">{count}</span></button> ) })}</div> </div> </div> </div> 
+                  </div> 
+                  <div className="border-t-2 border-coffee pt-4 space-y-4"> <div className="flex justify-between items-center"><h4 className="font-bold text-coffee opacity-80 text-lg">各科作業缺交</h4><button onClick={() => setIsAddingSubject(!isAddingSubject)} className="text-sm bg-mint px-3 py-1 rounded-full border-2 border-coffee hover:bg-green-200"><Icon name="Plus" className="w-4 h-4" /></button></div> {isAddingSubject && <div className="flex gap-2"><input autoFocus type="text" value={newSubjectName} onChange={e => setNewSubjectName(e.target.value)} className="input-hand text-lg py-2" /><button onClick={handleAddSubject} className="btn-3d px-4 bg-coffee text-white text-lg">OK</button></div>} {subjects.length > 0 ? ( <div className="space-y-3"> <div className="flex gap-2"> <select value={currentSubjectId} onChange={(e) => setCurrentSubjectId(e.target.value)} className="input-hand text-2xl flex-1 bg-gray-50 font-bold border-2 border-coffee h-[70px]">{subjects.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select> <button onClick={(e) => handleDeleteSubject(currentSubjectId, e)} className="btn-3d bg-pink text-white px-3"><Icon name="Trash2" className="w-6 h-6"/></button> </div> <button onClick={() => openSelector('missing', currentSubjectId)} className="btn-3d w-full bg-white py-4 text-lg flex justify-between px-5 border-2 border-coffee shadow-sm group active:bg-yellow"><span className="font-bold flex items-center gap-2"><Icon name="Edit3" className="w-6 h-6"/> <span className="text-2xl">登記 {subjects.find(s=>s.id===currentSubjectId)?.label} 缺交</span></span>{missingData[currentSubjectId]?.length > 0 ? <span className="bg-pink text-white px-3 py-1 rounded-full text-lg font-bold">{missingData[currentSubjectId].length} 人</span> : <span className="text-gray-400 text-sm">點擊登記</span>}</button> </div> ) : <div className="text-center text-gray-400 py-2">請先新增科目...</div>} <div className="flex flex-wrap gap-2 mt-2">{subjects.map(s => { const count = missingData[s.id]?.length || 0; if (count === 0) return null; return ( <button key={s.id} onClick={() => { setCurrentSubjectId(s.id); openSelector('missing', s.id); }} className="bg-white border-2 border-coffee px-3 py-2 rounded-full text-base font-bold flex items-center gap-2 shadow-sm hover:bg-gray-50">{s.label} <span className="bg-pink text-white px-2 rounded-full text-sm">{count}</span></button> ) })}</div> </div> </div> </div> 
           );
 
           const renderLog = () => (
